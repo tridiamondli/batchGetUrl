@@ -1,31 +1,57 @@
-// popup.js - 弹窗逻辑处理
+/**
+ * popup.js - 批量URL提取器主控制器
+ * 
+ * 这是Chrome插件的核心控制器类，负责处理用户界面交互、
+ * XPath规则管理、URL提取逻辑和存储管理等主要功能。
+ * 
+ * @author Chrome插件开发团队
+ * @version 1.0
+ * @since 2025-07-26
+ */
+
+/**
+ * URL提取器主控制器类
+ * 采用模块化设计，集成了用户界面控制、数据处理、存储管理等功能
+ */
 class URLExtractor {
+    /**
+     * 构造函数 - 初始化插件核心功能
+     */
     constructor() {
+        // 存储提取到的URL数组
         this.extractedUrls = [];
         
-        // 检查Chrome API是否可用
+        // 检查Chrome扩展API的可用性
+        // 支持Chrome Storage API和LocalStorage的双重降级策略
         this.chromeApiAvailable = this.checkChromeApiAvailability();
         
-        this.initializeElements();
-        this.bindEvents();
-        this.loadSavedXPath();
+        // 执行初始化流程
+        this.initializeElements();  // 初始化DOM元素引用
+        this.bindEvents();          // 绑定事件监听器
+        this.loadSavedXPath();      // 加载用户保存的XPath规则
     }
     
+    /**
+     * 检查Chrome扩展API的可用性
+     * 这是一个关键的兼容性检查，确保插件能在不同环境下正常工作
+     * 
+     * @returns {boolean} API是否可用
+     */
     checkChromeApiAvailability() {
         try {
-            // 检查chrome对象是否存在
+            // 第一层检查：chrome对象是否存在
             if (typeof chrome === 'undefined' || !chrome) {
                 console.warn('Chrome API不可用: chrome对象未定义或为null');
                 return false;
             }
             
-            // 检查storage API是否存在
+            // 第二层检查：storage API是否存在
             if (!chrome.storage) {
                 console.warn('Chrome API不可用: storage API未定义');
                 return false;
             }
             
-            // 检查storage.local API是否存在
+            // 第三层检查：storage.local API是否存在
             if (!chrome.storage.local) {
                 console.warn('Chrome API不可用: storage.local API未定义');
                 return false;

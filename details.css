@@ -55,7 +55,7 @@ body {
 
 .header h1 {
     margin: 0 0 10px 0;
-    font-size: 2.2em;
+    font-size: 2.8em;
     font-weight: 600;
     color: #2c3e50;
 }
@@ -64,6 +64,7 @@ body {
     margin: 0;
     font-style: italic;
     color: #7f8c8d;
+    font-size: 1.2em;
 }
 
 .actions {
@@ -165,14 +166,15 @@ body {
 }
 
 .url-index {
-    background: #6c757d;
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
     color: white;
-    padding: 4px 9px;
-    border-radius: 50%;
-    font-size: 12px;
-    min-width: 28px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    min-width: 35px;
     text-align: center;
     font-weight: bold;
+    box-shadow: 0 2px 6px rgba(86, 171, 47, 0.3);
 }
 
 .url-link {
@@ -188,19 +190,29 @@ body {
 }
 
 .copy-btn {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8c42 100%);
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 25px;
     cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .copy-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #ff5722 0%, #e85d20 50%, #ff7043 100%);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
+}
+
+.copy-btn:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.1s ease;
 }
 
 .notification {

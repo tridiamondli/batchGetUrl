@@ -1,17 +1,36 @@
-# 批量URL提取器 Chrome插件
+# 🎯 批量URL提取器 Chrome插件
 
-一个强大的Chrome浏览器插件，用于根据自定义XPath规则提取页面URL链接。
+> 一个功能强大的Chrome浏览器插件，专门用于根据自定义XPath规则批量提取网页中的URL链接
 
-## 功能特性
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-green.svg)](https://developer.chrome.com/docs/extensions/mv3/)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- ✅ **自定义XPath规则** - 支持灵活的XPath表达式来匹配页面元素
-- ✅ **XPath规则管理** - 保存、管理和删除自定义XPath规则
-- ✅ **智能路径补全** - 自动检测和补全相对路径为完整URL
-- ✅ **一键复制** - 将所有提取的URL复制到剪贴板（空格分隔）
-- ✅ **详情查看** - 弹窗显示所有URL的详细列表
-- ✅ **预设规则** - 内置常用的XPath规则模板 + 自定义规则
-- ✅ **去重处理** - 自动去除重复的URL
-- ✅ **使用统计** - 跟踪XPath规则的使用频率
+## ✨ 核心特性
+
+### 🔍 智能URL提取
+- **XPath规则支持**: 使用强大的XPath表达式精确定位目标链接
+- **相对路径智能补全**: 自动处理相对路径、协议相对路径等
+- **URL去重和规范化**: 智能去除重复链接，输出清洁结果
+- **实时提取预览**: 即时查看匹配数量和提取效果
+
+### 🎨 现代化界面
+- **精美UI设计**: 紫色渐变主题，现代化卡片布局
+- **流畅动画效果**: 悬停动画、加载状态、通知提示
+- **详情页面优化**: 绿色编号徽章 + 橙色胶囊复制按钮
+- **响应式布局**: 适配各种屏幕尺寸
+
+### 📋 管理功能
+- **自定义规则保存**: 保存常用XPath规则，支持命名和分类
+- **使用统计**: 追踪规则使用频率，智能排序
+- **内置规则库**: 预设常用提取规则，一键应用
+- **批量操作**: 支持多种分隔符的批量复制
+
+### 🔒 安全可靠
+- **Manifest V3兼容**: 符合最新Chrome扩展标准
+- **CSP安全合规**: 完全符合内容安全策略
+- **权限最小化**: 仅请求必要的浏览器权限
+- **双重存储**: Chrome Storage + LocalStorage降级策略
 
 ## 安装方法
 

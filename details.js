@@ -40,12 +40,12 @@ function renderPage(urls) {
     root.innerHTML = ''; // 清空加载提示
     document.title = '提取的URL列表 - ' + urls.length + '个';
 
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'header';
-    headerDiv.innerHTML = '<h1>🔗 提取的URL列表</h1><p>共找到 ' + urls.length + ' 个URL</p>';
-    
     const containerDiv = document.createElement('div');
     containerDiv.className = 'container';
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'header';
+    headerDiv.innerHTML = '<h1>🎯 提取的URL列表</h1><p>共找到 ' + urls.length + ' 个URL</p>';
     
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'actions';
@@ -88,9 +88,9 @@ function renderPage(urls) {
         urlListDiv.appendChild(item);
     });
 
+    containerDiv.appendChild(headerDiv);
     containerDiv.appendChild(actionsDiv);
     containerDiv.appendChild(urlListDiv);
-    root.appendChild(headerDiv);
     root.appendChild(containerDiv);
 
     // --- 分隔符处理函数 ---
