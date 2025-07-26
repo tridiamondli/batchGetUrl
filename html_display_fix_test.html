@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>HTML代码显示问题验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            background: #007bff;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 HTML代码显示问题验证</h1>
+        
+        <div class="status info">
+            <strong>修复目标：</strong><br>
+            确保导出窗口中不显示JavaScript代码，只显示正常的HTML内容。
+        </div>
+
+        <h2>🧪 测试步骤</h2>
+        <ol>
+            <li>点击下方按钮创建导出窗口</li>
+            <li>检查导出窗口是否正常显示</li>
+            <li>确认没有显示JavaScript代码</li>
+            <li>测试窗口中的按钮是否正常工作</li>
+        </ol>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn" id="testExportBtn">📋 创建导出窗口测试</button>
+            <button class="btn" id="testSimpleBtn" style="background: #28a745;">🪟 创建简单窗口测试</button>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const result = document.createElement('div');
+            result.className = `status ${type}`;
+            result.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(result);
+        }
+
+        function testExportWindow() {
+            logResult('开始创建导出窗口测试...', 'info');
+            
+            const testUrls = [
+                'https://www.example.com/page1',
+                'https://www.test.com/page2',
+                'https://www.github.com/project'
+            ];
+            const content = testUrls.join('\n');
+            const count = testUrls.length;
+            
+            try {
+                const exportWindow = window.open('', '_blank', 'width=700,height=500,scrollbars=yes,resizable=yes');
+                if (!exportWindow) {
+                    logResult('❌ 无法打开导出窗口', 'error');
+                    return;
+                }
+
+                const doc = exportWindow.document;
+                doc.open();
+                
+                // 修复后的HTML模板（不使用模板字符串避免显示问题）
+                const htmlContent = '<!DOCTYPE html>' +
+                    '<html>' +
+                    '<head>' +
+                        '<meta charset="utf-8">' +
+                        '<title>导出URL测试</title>' +
+                        '<style>' +
+                            'body { padding: 20px; font-family: Arial, sans-serif; background: #f8f9fa; }' +
+                            '.container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }' +
+                            'h3 { color: #2c3e50; margin-bottom: 15px; }' +
+                            'textarea { width: 100%; height: 300px; font-family: monospace; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; padding: 10px; }' +
+                            '.tips { background: #e7f3ff; padding: 15px; border-radius: 4px; margin: 15px 0; color: #0066cc; }' +
+                            '.actions { text-align: center; margin-top: 20px; }' +
+                            '.btn { padding: 10px 20px; margin: 0 5px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }' +
+                            '.btn-primary { background: #007bff; color: white; }' +
+                            '.btn-secondary { background: #6c757d; color: white; }' +
+                            '.btn:hover { opacity: 0.8; }' +
+                        '</style>' +
+                    '</head>' +
+                    '<body>' +
+                        '<div class="container">' +
+                            '<h3>📄 URL列表导出测试 (' + count + '个)</h3>' +
+                            '<textarea id="exportContent" readonly>' + content + '</textarea>' +
+                            '<div class="tips">' +
+                                '💡 <strong>使用提示：</strong><br>' +
+                                '1. 点击下方"全选内容"按钮选择所有URL<br>' +
+                                '2. 使用 Ctrl+C 复制内容<br>' +
+                                '3. 粘贴到文本编辑器中保存' +
+                            '</div>' +
+                            '<div class="actions">' +
+                                '<button class="btn btn-primary" id="selectAllBtn">📋 全选内容</button>' +
+                                '<button class="btn btn-secondary" id="closeBtn">❌ 关闭窗口</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</body>' +
+                    '</html>';
+                
+                doc.write(htmlContent);
+                
+                doc.close();
+
+                // 绑定事件
+                exportWindow.addEventListener('load', () => {
+                    const selectAllBtn = doc.getElementById('selectAllBtn');
+                    const closeBtn = doc.getElementById('closeBtn');
+                    const textarea = doc.getElementById('exportContent');
+                    
+                    if (selectAllBtn) {
+                        selectAllBtn.addEventListener('click', () => {
+                            if (textarea) {
+                                textarea.select();
+                                textarea.setSelectionRange(0, textarea.value.length);
+                            }
+                        });
+                    }
+                    
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            exportWindow.close();
+                        });
+                    }
+                    
+                    // 自动选中内容
+                    if (textarea) {
+                        textarea.focus();
+                        textarea.select();
+                    }
+                    
+                    logResult('✅ 导出窗口创建成功，事件已绑定', 'success');
+                });
+                
+                logResult('✅ 导出窗口HTML已写入，等待加载完成...', 'info');
+                
+            } catch (error) {
+                logResult('❌ 创建导出窗口失败: ' + error.message, 'error');
+            }
+        }
+
+        function testSimpleWindow() {
+            logResult('开始创建简单窗口测试...', 'info');
+            
+            try {
+                const simpleWindow = window.open('', '_blank', 'width=500,height=300');
+                if (!simpleWindow) {
+                    logResult('❌ 无法打开简单窗口', 'error');
+                    return;
+                }
+
+                // 使用字符串拼接，避免模板字符串显示问题
+                const simpleHTML = 
+                    '<html>' +
+                    '<head><title>简单测试窗口</title></head>' +
+                    '<body style="padding: 20px; font-family: Arial;">' +
+                        '<h2>✅ 简单窗口测试</h2>' +
+                        '<p>这是一个简单的测试窗口，用于验证window.open和document.write是否正常工作。</p>' +
+                        '<button id="closeSimpleBtn">关闭窗口</button>' +
+                    '</body>' +
+                    '</html>';
+                
+                simpleWindow.document.write(simpleHTML);
+                simpleWindow.document.close();
+                
+                // 绑定关闭按钮事件
+                simpleWindow.addEventListener('load', () => {
+                    const closeBtn = simpleWindow.document.getElementById('closeSimpleBtn');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            simpleWindow.close();
+                        });
+                    }
+                });
+                
+                logResult('✅ 简单窗口创建成功', 'success');
+                
+            } catch (error) {
+                logResult('❌ 创建简单窗口失败: ' + error.message, 'error');
+            }
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            logResult('HTML代码显示问题验证页面加载完成', 'success');
+            
+            // 绑定按钮事件
+            const testExportBtn = document.getElementById('testExportBtn');
+            const testSimpleBtn = document.getElementById('testSimpleBtn');
+            
+            if (testExportBtn) {
+                testExportBtn.addEventListener('click', testExportWindow);
+            }
+            
+            if (testSimpleBtn) {
+                testSimpleBtn.addEventListener('click', testSimpleWindow);
+            }
+        });
+    </script>
+</body>
+</html>

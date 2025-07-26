@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 400px;
+            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h2 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .input-container {
+            position: relative;
+        }
+        
+        #xpathInput {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e3e3e3;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: white;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        #xpathInput:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        .preset-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #95a5a6;
+            border: none;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .preset-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        .xpath-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+        
+        .btn-small {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #218838;
+        }
+        
+        .btn-manage {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .btn-manage:hover {
+            background: #5a32a3;
+        }
+        
+        .saved-xpath-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+        }
+        
+        .saved-xpath-info {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .saved-xpath-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+        
+        .saved-xpath-rule {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #666;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        
+        .saved-xpath-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-tiny {
+            padding: 3px 6px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        .btn-use {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-tiny:hover {
+            opacity: 0.8;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .close-btn:hover {
+            color: #dc3545;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, #1f5f7a);
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #219a52, #1a7a42);
+            transform: translateY(-1px);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496, #0f6674);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62, #3d4247);
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .preset-examples {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+        
+        .url-count {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        /* 图标样式 */
+        .icon {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🔗 批量URL提取器</h2>
+    </div>
+    
+    <div class="input-group">
+        <label for="xpathInput">XPath规则:</label>
+        <div class="input-container">
+            <input type="text" id="xpathInput" placeholder="例如: //a/@href" value="//a/@href">
+            <button class="preset-btn" id="presetBtn" title="使用预设规则">预设</button>
+        </div>
+        <div class="xpath-actions">
+            <button class="btn-small btn-save" id="saveXpathBtn" title="保存当前XPath规则">💾 保存</button>
+            <button class="btn-small btn-manage" id="manageXpathBtn" title="管理已保存的XPath">📋 管理</button>
+        </div>
+        <div class="preset-examples">
+            常用规则：//a/@href (所有链接) | //img/@src (所有图片)
+        </div>
+    </div>
+    
+    <div class="button-group">
+        <button class="btn btn-primary" id="extractBtn">
+            🔍 提取URL
+        </button>
+        <button class="btn btn-success" id="copyBtn" disabled>
+            📋 复制全部 (\n分隔)
+        </button>
+    </div>
+    
+    <div class="button-group">
+        <button class="btn btn-info" id="viewBtn" disabled>
+            👁️ 查看详情
+        </button>
+        <button class="btn btn-secondary" id="clearBtn">
+            🗑️ 清空结果
+        </button>
+    </div>
+    
+    <div id="status" class="status hidden"></div>
+    
+    <div class="url-count" id="urlCount"></div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

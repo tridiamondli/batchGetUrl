@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'; object-src 'none';">
+    <title>最终修复验证测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .test-section {
+            margin: 25px 0;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .test-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .test-description {
+            color: #5a6c7d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .log-container {
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .log-entry {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e1e8ed;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+        .log-entry:last-child { border-bottom: none; }
+        .log-success { background: #d4edda; color: #155724; }
+        .log-error { background: #f8d7da; color: #721c24; }
+        .log-info { background: #d1ecf1; color: #0c5460; }
+        .log-warning { background: #fff3cd; color: #856404; }
+        .checklist {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .checklist h3 {
+            color: #2d5f2d;
+            margin-top: 0;
+        }
+        .checklist ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .checklist li {
+            margin: 8px 0;
+            color: #2d5f2d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 最终修复验证测试</h1>
+        <div class="subtitle">验证Chrome插件导出功能的所有修复是否完全生效</div>
+
+        <div class="checklist">
+            <h3>✅ 验证清单</h3>
+            <ul>
+                <li><strong>CSP兼容性:</strong> 无内联事件处理器，所有事件使用addEventListener</li>
+                <li><strong>模板字符串修复:</strong> 不显示${变量}等JavaScript代码</li>
+                <li><strong>弹窗稳定性:</strong> 导出窗口正常打开，无卡顿，按钮响应正常</li>
+                <li><strong>资源管理:</strong> 正确清理Blob URL，无内存泄漏</li>
+                <li><strong>降级体验:</strong> 弹窗阻止时提供友好提示</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🪟 测试1: 标准导出窗口</div>
+            <div class="test-description">
+                创建一个完整的URL导出窗口，验证所有功能是否正常工作，特别注意是否显示JavaScript代码。
+            </div>
+            <button class="btn btn-primary" id="testStandardExport">启动标准导出测试</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🧪 测试2: DOM方法导出窗口</div>
+            <div class="test-description">
+                使用DOM createElement方法构建导出窗口，完全避免document.write，提供最高安全性。
+            </div>
+            <button class="btn btn-success" id="testDOMExport">启动DOM方法测试</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">⚡ 测试3: 弹窗阻止降级测试</div>
+            <div class="test-description">
+                模拟弹窗被阻止的情况，验证降级方案（文件下载）是否正常工作。
+            </div>
+            <button class="btn btn-warning" id="testFallback">启动降级测试</button>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-entry log-info">
+                <strong>📋 测试日志</strong> - 点击上方按钮开始测试，结果将在这里显示
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 日志系统
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry log-' + type;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = '<strong>[' + timestamp + ']</strong> ' + message;
+            
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 测试数据
+        const testUrls = [
+            'https://github.com/microsoft/vscode',
+            'https://developer.mozilla.org/en-US/docs/Web/API',
+            'https://stackoverflow.com/questions/tagged/javascript',
+            'https://www.w3.org/TR/CSP3/',
+            'https://web.dev/csp/'
+        ];
+
+        // 测试1: 标准导出窗口（最终修复：基于Load事件的纯DOM操作）
+        function testStandardExport() {
+            addLog('🚀 开始标准导出窗口测试 (Load Event + Pure DOM)...', 'info');
+            
+            try {
+                // 1. 打开一个完全空白的窗口，不指定URL
+                const exportWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                
+                if (!exportWindow) {
+                    addLog('❌ 弹窗被浏览器阻止，尝试降级方案...', 'warning');
+                    fallbackDownload('standard_export_test.txt', testUrls.join('\n'));
+                    return;
+                }
+
+                // 2. 监听新窗口的 'load' 事件，确保其初始文档已准备好
+                exportWindow.addEventListener('load', function() {
+                    try {
+                        const doc = exportWindow.document;
+                        const content = testUrls.join('\n');
+                        const count = testUrls.length;
+
+                        // --- 使用纯DOM操作构建页面，彻底避免解析问题 ---
+
+                        // 3. 构建 <head>
+                        doc.title = '标准导出测试 - ' + count + '个URL';
+                        const meta = doc.createElement('meta');
+                        meta.setAttribute('charset', 'utf-8');
+                        doc.head.appendChild(meta);
+
+                        const style = doc.createElement('style');
+                        style.textContent = 
+                            'body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; background: #f8f9fa; }' +
+                            '.header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; margin: -20px -20px 20px; text-align: center; }' +
+                            '.container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }' +
+                            'textarea { width: 100%; height: 300px; font-family: Monaco, monospace; font-size: 14px; border: 2px solid #e1e8ed; border-radius: 8px; padding: 15px; resize: vertical; }' +
+                            '.stats { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; color: #1565c0; }' +
+                            '.actions { text-align: center; margin-top: 20px; }' +
+                            '.btn { padding: 12px 24px; margin: 0 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }' +
+                            '.btn-primary { background: #007bff; color: white; }' +
+                            '.btn-success { background: #28a745; color: white; }' +
+                            '.btn-secondary { background: #6c757d; color: white; }' +
+                            '.btn:hover { transform: translateY(-1px); opacity: 0.9; }';
+                        doc.head.appendChild(style);
+
+                        // 4. 构建 <body>
+                        const headerDiv = doc.createElement('div');
+                        headerDiv.className = 'header';
+                        headerDiv.innerHTML = '<h2>📋 URL导出测试</h2><p>标准字符串拼接方法 - 已修复模板字符串显示问题</p>';
+                        doc.body.appendChild(headerDiv);
+
+                        const containerDiv = doc.createElement('div');
+                        containerDiv.className = 'container';
+                        doc.body.appendChild(containerDiv);
+
+                        const statsDiv = doc.createElement('div');
+                        statsDiv.className = 'stats';
+                        statsDiv.innerHTML = '📊 <strong>统计信息:</strong> 共导出 ' + count + ' 个URL，内容总长度 ' + content.length + ' 字符';
+                        containerDiv.appendChild(statsDiv);
+
+                        const textarea = doc.createElement('textarea');
+                        textarea.id = 'exportContent';
+                        textarea.readOnly = true;
+                        textarea.value = content;
+                        containerDiv.appendChild(textarea);
+
+                        const actionsDiv = doc.createElement('div');
+                        actionsDiv.className = 'actions';
+                        containerDiv.appendChild(actionsDiv);
+
+                        const selectAllBtn = doc.createElement('button');
+                        selectAllBtn.className = 'btn btn-primary';
+                        selectAllBtn.textContent = '📋 全选内容';
+                        actionsDiv.appendChild(selectAllBtn);
+
+                        const copyBtn = doc.createElement('button');
+                        copyBtn.className = 'btn btn-success';
+                        copyBtn.textContent = '📄 复制到剪贴板';
+                        actionsDiv.appendChild(copyBtn);
+
+                        const closeBtn = doc.createElement('button');
+                        closeBtn.className = 'btn btn-secondary';
+                        closeBtn.textContent = '❌ 关闭窗口';
+                        actionsDiv.appendChild(closeBtn);
+
+                        // 5. 绑定事件
+                        selectAllBtn.addEventListener('click', function() {
+                            textarea.select();
+                            textarea.setSelectionRange(0, textarea.value.length);
+                            addLog('✅ 内容已选中', 'success');
+                        });
+
+                        copyBtn.addEventListener('click', function() {
+                            try {
+                                textarea.select();
+                                doc.execCommand('copy');
+                                addLog('✅ 内容已复制到剪贴板', 'success');
+                            } catch (e) {
+                                addLog('⚠️ 复制失败，请手动选择复制', 'warning');
+                            }
+                        });
+
+                        closeBtn.addEventListener('click', function() {
+                            exportWindow.close();
+                            addLog('🔚 导出窗口已关闭', 'info');
+                        });
+                        
+                        // 6. 自动选中内容
+                        exportWindow.focus();
+                        textarea.focus();
+                        textarea.select();
+                        
+                        addLog('✅ 导出窗口构建完成 (最终方案)，请验证效果', 'success');
+
+                    } catch (e) {
+                        addLog('❌ 在load事件中构建窗口失败: ' + e.message, 'error');
+                    }
+                }, { once: true }); // 事件只执行一次
+                
+            } catch (error) {
+                addLog('❌ 标准导出测试失败: ' + error.message, 'error');
+            }
+        }
+
+        // 测试2: DOM方法导出窗口 (已修复)
+        function testDOMExport() {
+            addLog('🚀 开始DOM方法导出测试 (已修复)...', 'info');
+            
+            try {
+                const exportWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                
+                if (!exportWindow) {
+                    addLog('❌ 弹窗被浏览器阻止，尝试降级方案...', 'warning');
+                    fallbackDownload('dom_export_test.txt', testUrls.join('\n'));
+                    return;
+                }
+
+                // 使用 'load' 事件确保新窗口的文档已完全准备好
+                exportWindow.addEventListener('load', function() {
+                    try {
+                        const doc = exportWindow.document;
+
+                        // 清理 head 和 body 的默认内容，而不是整个 documentElement
+                        doc.head.innerHTML = '';
+                        doc.body.innerHTML = '';
+                        
+                        // --- 直接在现有的 head 和 body 中构建页面 ---
+
+                        // 1. 构建 <head>
+                        doc.title = 'DOM方法导出测试';
+                        
+                        const charset = doc.createElement('meta');
+                        charset.setAttribute('charset', 'utf-8');
+                        doc.head.appendChild(charset);
+                        
+                        const style = doc.createElement('style');
+                        style.textContent = 
+                            'body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; background: #f0f4f8; }' +
+                            '.header { background: linear-gradient(135deg, #56ab2f, #a8e6cf); color: white; padding: 20px; margin: -20px -20px 20px; text-align: center; }' +
+                            '.container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }' +
+                            'textarea { width: 100%; height: 300px; font-family: "SF Mono", Monaco, monospace; font-size: 14px; border: 2px solid #a8e6cf; border-radius: 8px; padding: 15px; resize: vertical; }' +
+                            '.method-info { background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0; color: #2d5f2d; }' +
+                            '.actions { text-align: center; margin-top: 20px; }' +
+                            '.btn { padding: 12px 24px; margin: 0 8px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; }' +
+                            '.btn-success { background: #28a745; color: white; }' +
+                            '.btn-info { background: #17a2b8; color: white; }' +
+                            '.btn-secondary { background: #6c757d; color: white; }' +
+                            '.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }';
+                        doc.head.appendChild(style);
+                        
+                        // 2. 构建 <body>
+                        const header = doc.createElement('div');
+                        header.className = 'header';
+                        header.innerHTML = '<h2>🛠️ DOM方法导出测试</h2><p>使用createElement构建，最高安全级别</p>';
+                        doc.body.appendChild(header);
+                        
+                        const container = doc.createElement('div');
+                        container.className = 'container';
+                        
+                        const methodInfo = doc.createElement('div');
+                        methodInfo.className = 'method-info';
+                        methodInfo.innerHTML = '🔧 <strong>构建方法:</strong> 此窗口完全使用DOM createElement方法构建，不使用document.write，提供最高的安全性和兼容性。';
+                        container.appendChild(methodInfo);
+                        
+                        const textarea = doc.createElement('textarea');
+                        textarea.id = 'exportContent';
+                        textarea.readOnly = true;
+                        textarea.value = testUrls.join('\n');
+                        container.appendChild(textarea);
+                        
+                        const actions = doc.createElement('div');
+                        actions.className = 'actions';
+                        
+                        const selectBtn = doc.createElement('button');
+                        selectBtn.className = 'btn btn-success';
+                        selectBtn.innerHTML = '📋 全选内容';
+                        selectBtn.addEventListener('click', function() {
+                            textarea.select();
+                            textarea.setSelectionRange(0, textarea.value.length);
+                            addLog('✅ DOM方法窗口内容已选中', 'success');
+                        });
+                        actions.appendChild(selectBtn);
+                        
+                        const copyBtn = doc.createElement('button');
+                        copyBtn.className = 'btn btn-info';
+                        copyBtn.innerHTML = '📄 复制内容';
+                        copyBtn.addEventListener('click', function() {
+                            try {
+                                textarea.select();
+                                doc.execCommand('copy');
+                                addLog('✅ DOM方法窗口内容已复制', 'success');
+                            } catch (e) {
+                                addLog('⚠️ 复制失败，请手动复制', 'warning');
+                            }
+                        });
+                        actions.appendChild(copyBtn);
+                        
+                        const closeBtn = doc.createElement('button');
+                        closeBtn.className = 'btn btn-secondary';
+                        closeBtn.innerHTML = '❌ 关闭窗口';
+                        closeBtn.addEventListener('click', function() {
+                            exportWindow.close();
+                            addLog('🔚 DOM方法窗口已关闭', 'info');
+                        });
+                        actions.appendChild(closeBtn);
+                        
+                        container.appendChild(actions);
+                        doc.body.appendChild(container);
+                        
+                        // 3. 自动选中内容
+                        exportWindow.focus();
+                        textarea.focus();
+                        textarea.select();
+                        
+                        addLog('✅ DOM方法导出窗口创建成功 (已修复)，完全避免根元素冲突', 'success');
+
+                    } catch (e) {
+                        addLog('❌ 在load事件中构建DOM窗口失败: ' + e.message, 'error');
+                    }
+                }, { once: true });
+                
+            } catch (error) {
+                addLog('❌ DOM方法导出测试失败: ' + error.message, 'error');
+            }
+        }
+
+        // 测试3: 降级方案测试
+        function testFallback() {
+            addLog('🚀 开始降级方案测试...', 'info');
+            addLog('ℹ️ 模拟弹窗被阻止，直接触发文件下载...', 'info');
+            
+            try {
+                const content = '# URL导出测试文件\n\n' +
+                    '导出时间: ' + new Date().toLocaleString() + '\n' +
+                    '总数量: ' + testUrls.length + ' 个URL\n\n' +
+                    '## URL列表\n\n' +
+                    testUrls.map((url, index) => (index + 1) + '. ' + url).join('\n') + '\n\n' +
+                    '## 说明\n' +
+                    '此文件由Chrome插件降级方案自动生成。\n' +
+                    '当弹窗被浏览器阻止时，插件会自动切换到文件下载模式。';
+                
+                fallbackDownload('fallback_test.txt', content);
+                addLog('✅ 降级方案测试完成，文件下载已触发', 'success');
+                
+            } catch (error) {
+                addLog('❌ 降级方案测试失败: ' + error.message, 'error');
+            }
+        }
+
+        // 降级下载方案
+        function fallbackDownload(filename, content) {
+            try {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 清理资源
+                setTimeout(function() {
+                    URL.revokeObjectURL(url);
+                }, 1000);
+                
+                addLog('📥 文件下载触发: ' + filename, 'success');
+                
+            } catch (error) {
+                addLog('❌ 降级下载失败: ' + error.message, 'error');
+            }
+        }
+
+        // 页面加载完成后绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🎯 最终修复验证测试页面已加载', 'success');
+            addLog('💡 请依次点击上方测试按钮，验证所有修复是否生效', 'info');
+            
+            const testStandardBtn = document.getElementById('testStandardExport');
+            const testDOMBtn = document.getElementById('testDOMExport');
+            const testFallbackBtn = document.getElementById('testFallback');
+            
+            if (testStandardBtn) {
+                testStandardBtn.addEventListener('click', testStandardExport);
+            }
+            
+            if (testDOMBtn) {
+                testDOMBtn.addEventListener('click', testDOMExport);
+            }
+            
+            if (testFallbackBtn) {
+                testFallbackBtn.addEventListener('click', testFallback);
+            }
+        });
+    </script>
+</body>
+</html>

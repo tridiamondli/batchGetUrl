@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>导出功能Alert修复测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            background: #007bff;
+        }
+        .btn:hover { opacity: 0.8; }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 10000;
+            max-width: 400px;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease-out;
+        }
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        .notification.warning { background: #ffc107; color: #212529; }
+        .notification.info { background: #17a2b8; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 导出功能Alert重复点击问题修复测试</h1>
+        
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h3>🎯 测试目标</h3>
+            <p>验证导出功能的alert弹窗是否需要点击两次才能关闭的问题已修复。</p>
+            <ul>
+                <li>✅ 修复alert时机和重复调用问题</li>
+                <li>✅ 使用非阻塞通知替代alert</li>
+                <li>✅ 增强下载监听和错误处理</li>
+                <li>✅ 防止资源泄漏和重复通知</li>
+            </ul>
+        </div>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h3>📝 测试步骤</h3>
+            <ol>
+                <li>点击下方"测试导出功能"按钮</li>
+                <li>观察通知消息是否立即显示</li>
+                <li>如果有alert弹窗，检查是否只需点击一次</li>
+                <li>检查下载是否正常开始</li>
+                <li>查看控制台日志确认没有重复调用</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn" onclick="testExportWithAlert()">🧪 测试导出功能 (原alert方式)</button>
+            <button class="btn" onclick="testExportWithNotification()" style="background: #28a745;">✨ 测试导出功能 (修复后通知)</button>
+            <button class="btn" onclick="testDirectDownload()" style="background: #17a2b8;">⬇️ 直接测试下载</button>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // 测试URL数据
+        const testUrls = [
+            'https://www.example.com/page1',
+            'https://www.test.com/page2',
+            'https://www.github.com/project',
+            '/relative/path/page3',
+            './current/page4'
+        ];
+
+        // 日志记录函数
+        function logTest(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const result = document.createElement('div');
+            result.className = `test-result ${type}`;
+            result.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(result);
+            result.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 非阻塞通知系统
+        function showNotification(message, type = 'info') {
+            // 移除现有通知
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(n => n.remove());
+            
+            // 创建新通知
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            // 添加关闭按钮
+            const closeBtn = document.createElement('span');
+            closeBtn.textContent = ' ×';
+            closeBtn.style.cssText = 'cursor: pointer; margin-left: 10px; font-size: 18px;';
+            closeBtn.onclick = () => notification.remove();
+            notification.appendChild(closeBtn);
+            
+            document.body.appendChild(notification);
+            
+            // 自动关闭
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+            
+            console.log('显示通知:', message);
+        }
+
+        // 测试原有的alert方式（可能有重复点击问题）
+        function testExportWithAlert() {
+            logTest('开始测试原有alert方式...', 'info');
+            
+            try {
+                const text = testUrls.join('\n');
+                
+                if (typeof Blob !== 'undefined' && typeof URL !== 'undefined' && URL.createObjectURL) {
+                    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    const urlObj = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = urlObj;
+                    a.download = 'test_export_alert_' + new Date().getTime() + '.txt';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // 原方式：立即显示alert（可能与下载操作冲突）
+                    alert('✅ 文件下载已开始 (' + testUrls.length + '个URL) - 检查是否需要点击两次！');
+                    
+                    logTest('使用原有alert方式完成', 'warning');
+                    
+                    setTimeout(() => {
+                        URL.revokeObjectURL(urlObj);
+                    }, 1000);
+                    
+                } else {
+                    alert('❌ Blob API不可用');
+                    logTest('Blob API不可用', 'error');
+                }
+            } catch (error) {
+                alert('❌ 导出失败: ' + error.message);
+                logTest('导出失败: ' + error.message, 'error');
+            }
+        }
+
+        // 测试修复后的通知方式
+        function testExportWithNotification() {
+            logTest('开始测试修复后的通知方式...', 'info');
+            
+            try {
+                const text = testUrls.join('\n');
+                
+                if (typeof Blob !== 'undefined' && typeof URL !== 'undefined' && URL.createObjectURL) {
+                    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    const urlObj = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = urlObj;
+                    a.download = 'test_export_notification_' + new Date().getTime() + '.txt';
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    
+                    // 修复后的方式：监听下载，避免重复通知
+                    let downloadNotified = false;
+                    
+                    const showSuccessNotification = () => {
+                        if (!downloadNotified) {
+                            downloadNotified = true;
+                            showNotification('✅ 文件下载已开始 (' + testUrls.length + '个URL)', 'success');
+                            logTest('使用修复后的通知方式完成', 'success');
+                        }
+                    };
+                    
+                    // 监听点击事件
+                    a.addEventListener('click', showSuccessNotification);
+                    
+                    // 触发下载
+                    a.click();
+                    
+                    // 备用通知（如果click事件没有触发）
+                    setTimeout(() => {
+                        if (!downloadNotified) {
+                            showSuccessNotification();
+                        }
+                    }, 200);
+                    
+                    document.body.removeChild(a);
+                    
+                    setTimeout(() => {
+                        URL.revokeObjectURL(urlObj);
+                        logTest('资源已清理', 'info');
+                    }, 2000);
+                    
+                } else {
+                    showNotification('❌ Blob API不可用', 'error');
+                    logTest('Blob API不可用', 'error');
+                }
+            } catch (error) {
+                showNotification('❌ 导出失败: ' + error.message, 'error');
+                logTest('导出失败: ' + error.message, 'error');
+            }
+        }
+
+        // 直接测试下载功能
+        function testDirectDownload() {
+            logTest('直接测试下载功能...', 'info');
+            
+            const text = testUrls.join('\n');
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'direct_test_' + new Date().getTime() + '.txt';
+            a.style.display = 'none';
+            
+            document.body.appendChild(a);
+            
+            // 添加详细的事件监听
+            a.addEventListener('click', () => {
+                logTest('下载链接被点击', 'info');
+                showNotification('下载已触发', 'info');
+            });
+            
+            try {
+                a.click();
+                logTest('下载触发成功', 'success');
+            } catch (error) {
+                logTest('下载触发失败: ' + error.message, 'error');
+            }
+            
+            document.body.removeChild(a);
+            
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+                logTest('下载URL已清理', 'info');
+            }, 1000);
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            logTest('Alert修复测试页面加载完成', 'success');
+            showNotification('欢迎使用导出功能修复测试！', 'info');
+        });
+    </script>
+</body>
+</html>

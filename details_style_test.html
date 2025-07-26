@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>详情页面样式测试</title>
+    <link rel="stylesheet" href="details.css">
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 提取的URL列表</h1>
+        <p>共找到 5 个URL</p>
+    </div>
+    
+    <div class="container">
+        <div class="actions">
+            <div class="separator-control">
+                <label for="separatorSelect">分隔符:</label>
+                <select id="separatorSelect">
+                    <option value="\n">换行符 (\n)</option>
+                    <option value=" ">空格</option>
+                    <option value=", ">逗号+空格</option>
+                    <option value="; ">分号+空格</option>
+                    <option value="\t">制表符 (\t)</option>
+                    <option value="|">竖线 (|)</option>
+                    <option value="custom">自定义...</option>
+                </select>
+                <input type="text" id="customSeparator" placeholder="输入自定义分隔符" style="display:none; margin-left:5px; width:120px;">
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success">📋 复制全部</button>
+                <button class="btn btn-primary">💾 导出文本</button>
+                <button class="btn btn-secondary">❌ 关闭</button>
+            </div>
+        </div>
+        
+        <div class="url-list">
+            <div class="url-item">
+                <span class="url-index">1</span>
+                <a href="https://example1.com" class="url-link" target="_blank">https://example1.com</a>
+                <button class="copy-btn">复制</button>
+            </div>
+            <div class="url-item">
+                <span class="url-index">2</span>
+                <a href="https://example2.com" class="url-link" target="_blank">https://example2.com</a>
+                <button class="copy-btn">复制</button>
+            </div>
+            <div class="url-item">
+                <span class="url-index">3</span>
+                <a href="https://example3.com" class="url-link" target="_blank">https://example3.com</a>
+                <button class="copy-btn">复制</button>
+            </div>
+            <div class="url-item">
+                <span class="url-index">4</span>
+                <a href="https://example4.com" class="url-link" target="_blank">https://example4.com</a>
+                <button class="copy-btn">复制</button>
+            </div>
+            <div class="url-item">
+                <span class="url-index">5</span>
+                <a href="https://example5.com" class="url-link" target="_blank">https://example5.com</a>
+                <button class="copy-btn">复制</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 分隔符选择器事件
+        document.getElementById('separatorSelect').addEventListener('change', function() {
+            const customInput = document.getElementById('customSeparator');
+            if (this.value === 'custom') {
+                customInput.style.display = 'inline';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

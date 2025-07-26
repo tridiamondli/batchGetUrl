@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>详情弹窗CSP修复测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .btn-primary { background: #007bff; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 详情弹窗CSP修复测试</h1>
+        <p>此页面用于测试修复后的详情弹窗功能，验证CSP兼容性和事件绑定。</p>
+        
+        <div class="section">
+            <h2>🧪 测试功能</h2>
+            <button class="btn btn-primary" onclick="testDetailWindow()">测试详情窗口创建</button>
+            <button class="btn btn-success" onclick="testEventBinding()">测试事件绑定</button>
+            <button class="btn btn-warning" onclick="testCopyFunctions()">测试复制功能</button>
+            <div id="testResults"></div>
+        </div>
+        
+        <div class="section">
+            <h2>📋 模拟URL列表</h2>
+            <p>测试将使用以下URL进行验证：</p>
+            <ul id="testUrls">
+                <li>https://www.example.com/page1</li>
+                <li>https://www.test.com/page2</li>
+                <li>/relative/path/page3</li>
+                <li>./current/page4</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>🔍 调试信息</h2>
+            <div id="debugInfo" class="test-result info">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟BatchGetUrlTool类的测试版本
+        class BatchGetUrlToolTest {
+            constructor() {
+                this.extractedUrls = [
+                    'https://www.example.com/page1',
+                    'https://www.test.com/page2',
+                    'https://www.github.com/project',
+                    '/relative/path/page3',
+                    './current/page4'
+                ];
+                console.log('测试工具初始化完成');
+            }
+
+            viewUrls() {
+                console.log('测试viewUrls方法');
+                
+                if (this.extractedUrls.length === 0) {
+                    this.logTest('没有可查看的URL', 'error');
+                    return;
+                }
+
+                // 创建查看窗口
+                const viewWindow = window.open('', 'URLViewer', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                
+                if (!viewWindow) {
+                    this.logTest('无法打开新窗口，请检查浏览器弹窗设置', 'error');
+                    return;
+                }
+
+                // 构建URL列表HTML (不包含内联事件)
+                const urlListItems = this.extractedUrls.map((url, index) => {
+                    return `<div class="url-item">
+                        <span class="url-index">${index + 1}</span>
+                        <a href="${url}" class="url-link" target="_blank">${url}</a>
+                        <button class="copy-btn" data-url="${url}" data-index="${index}">复制</button>
+                    </div>`;
+                }).join('');
+
+                // 生成完整的HTML（不包含内联脚本）
+                const htmlContent = this.generateDetailHTMLWithoutInlineScript(urlListItems);
+                
+                try {
+                    // 使用更安全的方式设置HTML内容，避免CSP问题
+                    viewWindow.document.open();
+                    viewWindow.document.write(htmlContent);
+                    viewWindow.document.close();
+                    
+                    // 等待DOM加载完成后绑定事件
+                    const bindEvents = () => {
+                        console.log('开始绑定详情窗口事件...');
+                        this.bindDetailWindowEvents(viewWindow, this.extractedUrls);
+                    };
+                    
+                    if (viewWindow.document.readyState === 'complete') {
+                        bindEvents();
+                    } else {
+                        viewWindow.addEventListener('load', bindEvents);
+                        // 备用方案
+                        setTimeout(bindEvents, 100);
+                    }
+                    
+                    this.logTest('详情窗口创建成功', 'success');
+                    
+                } catch (error) {
+                    console.error('写入详情窗口失败:', error);
+                    console.log('尝试使用备用方法...');
+                    
+                    // 关闭当前窗口并使用备用方法
+                    viewWindow.close();
+                    this.viewUrlsAlternative();
+                }
+            }
+
+            generateDetailHTMLWithoutInlineScript(urlListItems) {
+                return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>提取的URL列表</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f8f9fa; }
+        .header { background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .stats { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .url-list { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .url-item { padding: 12px 15px; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; gap: 10px; }
+        .url-item:last-child { border-bottom: none; }
+        .url-item:hover { background: #f8f9fa; }
+        .url-index { background: #6c757d; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; min-width: 30px; text-align: center; }
+        .url-link { flex: 1; word-break: break-all; color: #2980b9; text-decoration: none; }
+        .url-link:hover { text-decoration: underline; }
+        .copy-btn { background: #28a745; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .copy-btn:hover { background: #218838; }
+        .actions { text-align: center; margin: 20px 0; }
+        .btn { padding: 10px 20px; margin: 0 5px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: white; }
+        .btn-primary { background: #007bff; }
+        .btn-success { background: #28a745; }
+        .debug { background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; border: 1px solid #dee2e6; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 提取的URL列表</h1>
+        <p>共找到 ${this.extractedUrls.length} 个URL</p>
+    </div>
+    
+    <div class="stats">
+        <strong>统计信息:</strong><br>
+        总数量: ${this.extractedUrls.length}<br>
+        提取时间: ${new Date().toLocaleString()}
+    </div>
+    
+    <div class="actions">
+        <button class="btn btn-success" id="copyAllBtn">📋 复制全部URL</button>
+        <button class="btn btn-primary" id="exportBtn">💾 导出为文本</button>
+        <button class="btn" id="debugBtn" style="background: #6c757d;">🔍 调试信息</button>
+    </div>
+    
+    <div id="debugInfo" class="debug" style="display: none;"></div>
+    
+    <div class="url-list">
+        ${urlListItems}
+    </div>
+</body>
+</html>`;
+            }
+
+            bindDetailWindowEvents(viewWindow, urls) {
+                const doc = viewWindow.document;
+                console.log('绑定详情窗口事件，URL数量:', urls.length);
+                
+                // 检查文档状态
+                console.log('文档就绪状态:', doc.readyState);
+                console.log('窗口对象存在:', !!viewWindow);
+                
+                // 绑定复制全部按钮
+                const copyAllBtn = doc.getElementById('copyAllBtn');
+                console.log('复制全部按钮:', !!copyAllBtn);
+                if (copyAllBtn) {
+                    copyAllBtn.addEventListener('click', () => {
+                        console.log('点击复制全部按钮');
+                        this.copyAllUrlsInDetailWindow(viewWindow, urls);
+                    });
+                }
+                
+                // 绑定导出按钮
+                const exportBtn = doc.getElementById('exportBtn');
+                console.log('导出按钮:', !!exportBtn);
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', () => {
+                        console.log('点击导出按钮');
+                        this.exportUrlsInDetailWindow(viewWindow, urls);
+                    });
+                }
+                
+                // 绑定调试按钮
+                const debugBtn = doc.getElementById('debugBtn');
+                console.log('调试按钮:', !!debugBtn);
+                if (debugBtn) {
+                    debugBtn.addEventListener('click', () => {
+                        console.log('点击调试按钮');
+                        this.showDebugInfoInDetailWindow(viewWindow, urls);
+                    });
+                }
+                
+                // 绑定单个复制按钮
+                const copyBtns = doc.querySelectorAll('.copy-btn');
+                console.log('单个复制按钮数量:', copyBtns.length);
+                copyBtns.forEach((btn, index) => {
+                    console.log(`绑定第${index + 1}个复制按钮`);
+                    btn.addEventListener('click', (e) => {
+                        console.log('点击单个复制按钮');
+                        const url = e.target.getAttribute('data-url');
+                        console.log('获取到的URL:', url);
+                        if (url) {
+                            this.copyUrlInDetailWindow(viewWindow, url);
+                        } else {
+                            console.error('未找到data-url属性');
+                        }
+                    });
+                });
+                
+                console.log('所有事件绑定完成');
+                this.logTest('事件绑定完成，共绑定' + (3 + copyBtns.length) + '个事件', 'success');
+            }
+
+            copyUrlInDetailWindow(viewWindow, url) {
+                console.log('开始复制单个URL:', url);
+                
+                // 方法1: 尝试现代剪贴板API
+                if (viewWindow.navigator.clipboard && viewWindow.navigator.clipboard.writeText) {
+                    viewWindow.navigator.clipboard.writeText(url).then(() => {
+                        console.log('剪贴板API复制成功');
+                        viewWindow.alert('✅ URL已复制: ' + (url.length > 50 ? url.substring(0, 50) + '...' : url));
+                        this.logTest('剪贴板API复制成功', 'success');
+                    }).catch(err => {
+                        console.error('剪贴板API失败:', err);
+                        this.fallbackCopyInDetailWindow(viewWindow, url);
+                    });
+                } else {
+                    console.log('剪贴板API不可用，使用降级方案');
+                    this.fallbackCopyInDetailWindow(viewWindow, url);
+                }
+            }
+
+            fallbackCopyInDetailWindow(viewWindow, text) {
+                console.log('使用降级复制方案');
+                
+                const doc = viewWindow.document;
+                const textarea = doc.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '0';
+                textarea.style.opacity = '0';
+                doc.body.appendChild(textarea);
+                
+                try {
+                    textarea.focus();
+                    textarea.select();
+                    textarea.setSelectionRange(0, textarea.value.length);
+                    
+                    const successful = doc.execCommand('copy');
+                    console.log('execCommand结果:', successful);
+                    
+                    if (successful) {
+                        viewWindow.alert('✅ 内容已复制到剪贴板');
+                        this.logTest('降级复制成功', 'success');
+                    } else {
+                        viewWindow.prompt('自动复制失败，请手动复制以下内容:', text);
+                        this.logTest('降级到手动复制', 'info');
+                    }
+                } catch (err) {
+                    console.error('execCommand失败:', err);
+                    viewWindow.prompt('自动复制失败，请手动复制以下内容:', text);
+                    this.logTest('复制失败，降级到手动复制', 'error');
+                } finally {
+                    doc.body.removeChild(textarea);
+                }
+            }
+
+            copyAllUrlsInDetailWindow(viewWindow, urls) {
+                console.log('开始复制所有URL');
+                const allUrls = urls.join('\n');
+                
+                if (viewWindow.navigator.clipboard && viewWindow.navigator.clipboard.writeText) {
+                    viewWindow.navigator.clipboard.writeText(allUrls).then(() => {
+                        console.log('批量复制成功');
+                        viewWindow.alert('✅ 所有URL已复制到剪贴板（' + urls.length + '个，换行分隔）');
+                        this.logTest('批量复制成功', 'success');
+                    }).catch(err => {
+                        console.error('批量复制失败:', err);
+                        this.fallbackCopyInDetailWindow(viewWindow, allUrls);
+                    });
+                } else {
+                    this.fallbackCopyInDetailWindow(viewWindow, allUrls);
+                }
+            }
+
+            exportUrlsInDetailWindow(viewWindow, urls) {
+                console.log('开始导出URL');
+                const content = urls.join('\n');
+                
+                try {
+                    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = viewWindow.document.createElement('a');
+                    a.href = url;
+                    a.download = 'extracted_urls_' + new Date().toISOString().slice(0, 10) + '.txt';
+                    viewWindow.document.body.appendChild(a);
+                    a.click();
+                    viewWindow.document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.logTest('导出成功', 'success');
+                } catch (error) {
+                    console.error('导出失败:', error);
+                    // 降级方案：在新窗口显示文本
+                    const textWindow = viewWindow.open('', 'ExportText', 'width=600,height=400,scrollbars=yes');
+                    textWindow.document.write('<pre>' + content + '</pre>');
+                    this.logTest('导出降级到新窗口显示', 'info');
+                }
+            }
+
+            showDebugInfoInDetailWindow(viewWindow, urls) {
+                console.log('显示调试信息');
+                const debugInfo = viewWindow.document.getElementById('debugInfo');
+                if (debugInfo) {
+                    const info = `
+调试信息:
+- URL数量: ${urls.length}
+- 当前时间: ${new Date().toLocaleString()}
+- 浏览器: ${navigator.userAgent}
+- 剪贴板API支持: ${!!navigator.clipboard}
+- Blob API支持: ${typeof Blob !== 'undefined'}
+                    `;
+                    debugInfo.textContent = info;
+                    debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+                    this.logTest('调试信息显示/隐藏', 'info');
+                }
+            }
+
+            logTest(message, type = 'info') {
+                const results = document.getElementById('testResults');
+                const debug = document.getElementById('debugInfo');
+                
+                const result = document.createElement('div');
+                result.className = `test-result ${type}`;
+                result.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                
+                if (results) {
+                    results.appendChild(result);
+                }
+                
+                if (debug) {
+                    debug.textContent = `最新: ${message}`;
+                }
+            }
+        }
+
+        // 创建测试实例
+        const testTool = new BatchGetUrlToolTest();
+
+        function testDetailWindow() {
+            testTool.logTest('开始测试详情窗口创建...', 'info');
+            testTool.viewUrls();
+        }
+
+        function testEventBinding() {
+            testTool.logTest('事件绑定测试：请打开详情窗口后点击各个按钮', 'info');
+        }
+
+        function testCopyFunctions() {
+            testTool.logTest('复制功能测试：请在详情窗口中测试复制按钮', 'info');
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            testTool.logTest('测试页面加载完成', 'success');
+        });
+    </script>
+</body>
+</html>

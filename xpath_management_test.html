@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPath管理功能测试页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .xpath-example {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .test-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .test-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+        }
+        
+        .test-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .test-item a:hover {
+            text-decoration: underline;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e83e8c;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 XPath管理功能测试</h1>
+        <p>测试自定义XPath规则的保存、管理和删除功能</p>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 新功能说明</h3>
+        <div class="instructions">
+            <h4>XPath规则管理功能</h4>
+            <ul class="feature-list">
+                <li>保存自定义XPath规则，为每个规则设置名称</li>
+                <li>管理已保存的规则，查看使用统计</li>
+                <li>快速应用已保存的规则</li>
+                <li>删除不需要的规则</li>
+                <li>预设规则中显示自定义规则</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🎯 测试步骤</h3>
+        <div class="instructions">
+            <ol>
+                <li><strong>保存XPath规则：</strong>
+                    <ul>
+                        <li>在XPath输入框中输入规则</li>
+                        <li>点击"💾 保存"按钮</li>
+                        <li>输入规则名称（如："商品链接"、"图片URL"等）</li>
+                    </ul>
+                </li>
+                <li><strong>管理已保存规则：</strong>
+                    <ul>
+                        <li>点击"📋 管理"按钮打开管理界面</li>
+                        <li>查看所有已保存的规则</li>
+                        <li>使用"使用"按钮应用规则</li>
+                        <li>使用"删除"按钮删除规则</li>
+                    </ul>
+                </li>
+                <li><strong>预设规则：</strong>
+                    <ul>
+                        <li>点击"预设"按钮</li>
+                        <li>查看内置规则和自定义规则</li>
+                        <li>自定义规则按使用次数排序</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 建议测试的XPath规则</h3>
+        <div class="xpath-example">
+            <strong>电商网站链接：</strong><br>
+            <code>//a[contains(@class, 'product')]/@href</code>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                规则名称建议：商品页面链接
+            </div>
+        </div>
+        
+        <div class="xpath-example">
+            <strong>新闻标题链接：</strong><br>
+            <code>//h3//a/@href</code>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                规则名称建议：新闻标题链接
+            </div>
+        </div>
+        
+        <div class="xpath-example">
+            <strong>下载文件链接：</strong><br>
+            <code>//a[contains(@href, '.pdf') or contains(@href, '.zip') or contains(@href, '.doc')]/@href</code>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                规则名称建议：文档下载链接
+            </div>
+        </div>
+        
+        <div class="xpath-example">
+            <strong>高清图片：</strong><br>
+            <code>//img[contains(@src, 'large') or contains(@src, 'big') or contains(@src, 'hd')]/@src</code>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                规则名称建议：高清图片链接
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🌐 测试数据 - 各种类型的链接</h3>
+        <div class="test-data">
+            <div class="test-item">
+                <h4>商品链接</h4>
+                <a href="/product/item1" class="product">商品1</a><br>
+                <a href="/product/item2" class="product">商品2</a><br>
+                <a href="/product/item3" class="product">商品3</a>
+            </div>
+            
+            <div class="test-item">
+                <h4>新闻链接</h4>
+                <h3><a href="/news/article1">重要新闻1</a></h3>
+                <h3><a href="/news/article2">重要新闻2</a></h3>
+                <h3><a href="/news/article3">重要新闻3</a></h3>
+            </div>
+            
+            <div class="test-item">
+                <h4>下载文件</h4>
+                <a href="/files/manual.pdf">用户手册</a><br>
+                <a href="/files/data.zip">数据包</a><br>
+                <a href="/files/report.doc">报告文档</a>
+            </div>
+            
+            <div class="test-item">
+                <h4>高清图片</h4>
+                <img src="/images/photo_large.jpg" alt="大图1" style="width: 50px;"><br>
+                <img src="/images/banner_hd.png" alt="高清横幅" style="width: 50px;"><br>
+                <img src="/images/poster_big.jpg" alt="大海报" style="width: 50px;">
+            </div>
+            
+            <div class="test-item">
+                <h4>普通链接</h4>
+                <a href="/about">关于我们</a><br>
+                <a href="/contact">联系方式</a><br>
+                <a href="/help">帮助中心</a>
+            </div>
+            
+            <div class="test-item">
+                <h4>外部链接</h4>
+                <a href="https://www.example.com">示例网站</a><br>
+                <a href="https://www.github.com">GitHub</a><br>
+                <a href="https://www.google.com">谷歌搜索</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 功能验证清单</h3>
+        <div class="instructions">
+            <h4>保存功能测试：</h4>
+            <ul>
+                <li>□ 能否成功保存带名称的XPath规则</li>
+                <li>□ 保存时是否有成功提示</li>
+                <li>□ 重复名称是否会覆盖原规则</li>
+            </ul>
+            
+            <h4>管理功能测试：</h4>
+            <ul>
+                <li>□ 管理界面是否正确显示所有已保存规则</li>
+                <li>□ 显示创建时间和使用次数</li>
+                <li>□ "使用"按钮是否能正确应用规则</li>
+                <li>□ "删除"按钮是否能正确删除规则</li>
+                <li>□ 删除时是否有确认提示</li>
+            </ul>
+            
+            <h4>预设规则测试：</h4>
+            <ul>
+                <li>□ 预设规则是否包含自定义规则</li>
+                <li>□ 自定义规则是否按使用次数排序</li>
+                <li>□ 使用次数是否正确统计</li>
+            </ul>
+            
+            <h4>持久化测试：</h4>
+            <ul>
+                <li>□ 重新打开插件后规则是否仍然存在</li>
+                <li>□ 使用次数是否正确保存</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成提示
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('XPath管理功能测试页面已加载');
+            console.log('请打开浏览器插件开始测试新的XPath管理功能');
+            
+            // 显示当前页面的一些统计信息
+            const stats = {
+                '总链接数': document.querySelectorAll('a').length,
+                '商品链接数': document.querySelectorAll('a.product').length,
+                '新闻标题数': document.querySelectorAll('h3 a').length,
+                '下载文件数': document.querySelectorAll('a[href*=".pdf"], a[href*=".zip"], a[href*=".doc"]').length,
+                '图片数量': document.querySelectorAll('img').length,
+                '外部链接数': document.querySelectorAll('a[href^="http"]').length
+            };
+            
+            console.log('页面统计信息:', stats);
+        });
+    </script>
+</body>
+</html>

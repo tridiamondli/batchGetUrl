@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>图标生成器</title>
+</head>
+<body>
+    <canvas id="canvas16" width="16" height="16" style="border:1px solid #ccc; margin:5px;"></canvas>
+    <canvas id="canvas48" width="48" height="48" style="border:1px solid #ccc; margin:5px;"></canvas>
+    <canvas id="canvas128" width="128" height="128" style="border:1px solid #ccc; margin:5px;"></canvas>
+    
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // 清空画布
+            ctx.clearRect(0, 0, size, size);
+            
+            // 背景渐变
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#3498db');
+            gradient.addColorStop(1, '#2980b9');
+            
+            // 绘制圆形背景
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 1, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 绘制链接图标
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineWidth = Math.max(1, size / 16);
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const linkSize = size * 0.6;
+            const linkWidth = linkSize * 0.15;
+            
+            // 左边的链环
+            ctx.beginPath();
+            ctx.arc(centerX - linkSize * 0.2, centerY, linkSize * 0.25, 0, 2 * Math.PI);
+            ctx.lineWidth = linkWidth;
+            ctx.stroke();
+            
+            // 右边的链环
+            ctx.beginPath();
+            ctx.arc(centerX + linkSize * 0.2, centerY, linkSize * 0.25, 0, 2 * Math.PI);
+            ctx.lineWidth = linkWidth;
+            ctx.stroke();
+            
+            // 中间连接线
+            ctx.beginPath();
+            ctx.moveTo(centerX - linkSize * 0.1, centerY);
+            ctx.lineTo(centerX + linkSize * 0.1, centerY);
+            ctx.lineWidth = linkWidth;
+            ctx.stroke();
+        }
+        
+        // 绘制不同尺寸的图标
+        drawIcon(document.getElementById('canvas16'), 16);
+        drawIcon(document.getElementById('canvas48'), 48);
+        drawIcon(document.getElementById('canvas128'), 128);
+        
+        // 转换为PNG并下载
+        function downloadIcon(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // 自动下载图标
+        setTimeout(() => {
+            downloadIcon(document.getElementById('canvas16'), 'icon16.png');
+            downloadIcon(document.getElementById('canvas48'), 'icon48.png');
+            downloadIcon(document.getElementById('canvas128'), 'icon128.png');
+        }, 1000);
+    </script>
+</body>
+</html>

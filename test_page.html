@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL提取器测试页面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .section h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .link-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+        
+        .external-link {
+            border-left-color: #e74c3c;
+        }
+        
+        .download-link {
+            border-left-color: #27ae60;
+        }
+        
+        .media-link {
+            border-left-color: #f39c12;
+        }
+        
+        .test-instructions {
+            background: #e8f4f8;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .xpath-examples {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .xpath-examples code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 URL提取器测试页面</h1>
+        
+        <div class="test-instructions">
+            <h3>📋 测试说明</h3>
+            <p>本页面包含了各种类型的链接和媒体资源，用于测试URL提取器插件的功能。</p>
+            <p><strong>使用方法：</strong></p>
+            <ol>
+                <li>确保已安装URL提取器插件</li>
+                <li>点击浏览器工具栏中的插件图标</li>
+                <li>输入下方提供的XPath规则进行测试</li>
+                <li>查看提取结果是否符合预期</li>
+            </ol>
+            
+            <div class="xpath-examples">
+                <strong>常用测试XPath规则：</strong><br>
+                • 所有链接：<code>//a/@href</code><br>
+                • 外部链接：<code>//a[starts-with(@href, "http")]/@href</code><br>
+                • 下载链接：<code>//a[@class="download-link"]/@href</code><br>
+                • 图片链接：<code>//img/@src</code><br>
+                • 特定区域链接：<code>//div[@class="links-grid"]//a/@href</code>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🌐 站内链接 (相对路径)</h2>
+            <div class="links-grid">
+                <div class="link-item">
+                    <a href="/page1.html">页面1 (根相对路径)</a>
+                    <p>测试根相对路径补全</p>
+                </div>
+                <div class="link-item">
+                    <a href="page2.html">页面2 (相对路径)</a>
+                    <p>测试相对路径补全</p>
+                </div>
+                <div class="link-item">
+                    <a href="../parent/page3.html">页面3 (父级路径)</a>
+                    <p>测试父级路径补全</p>
+                </div>
+                <div class="link-item">
+                    <a href="./current/page4.html">页面4 (当前路径)</a>
+                    <p>测试当前路径补全</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔗 外部链接</h2>
+            <div class="links-grid">
+                <div class="link-item external-link">
+                    <a href="https://www.github.com" target="_blank">GitHub</a>
+                    <p>代码托管平台</p>
+                </div>
+                <div class="link-item external-link">
+                    <a href="https://www.stackoverflow.com" target="_blank">Stack Overflow</a>
+                    <p>开发者问答社区</p>
+                </div>
+                <div class="link-item external-link">
+                    <a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a>
+                    <p>Web开发文档</p>
+                </div>
+                <div class="link-item external-link">
+                    <a href="//www.w3.org/TR/xpath/" target="_blank">XPath规范</a>
+                    <p>协议相对URL测试</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📁 下载链接</h2>
+            <div class="links-grid">
+                <div class="link-item download-link">
+                    <a href="/downloads/document.pdf" class="download-link">PDF文档</a>
+                    <p>测试PDF文件链接</p>
+                </div>
+                <div class="link-item download-link">
+                    <a href="/downloads/archive.zip" class="download-link">ZIP压缩包</a>
+                    <p>测试压缩文件链接</p>
+                </div>
+                <div class="link-item download-link">
+                    <a href="/downloads/image.jpg" class="download-link">图片文件</a>
+                    <p>测试图片下载链接</p>
+                </div>
+                <div class="link-item download-link">
+                    <a href="https://example.com/software.exe" class="download-link">软件安装包</a>
+                    <p>测试外部下载链接</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🖼️ 媒体资源</h2>
+            <div class="links-grid">
+                <div class="link-item media-link">
+                    <img src="/images/test1.jpg" alt="测试图片1">
+                    <p>相对路径图片</p>
+                </div>
+                <div class="link-item media-link">
+                    <img src="https://via.placeholder.com/200x150/3498db/ffffff?text=Image2" alt="测试图片2">
+                    <p>外部图片链接</p>
+                </div>
+                <div class="link-item media-link">
+                    <a href="/videos/demo.mp4">视频文件</a>
+                    <p>测试视频链接</p>
+                </div>
+                <div class="link-item media-link">
+                    <a href="/audio/music.mp3">音频文件</a>
+                    <p>测试音频链接</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🎯 特殊链接</h2>
+            <div class="links-grid">
+                <div class="link-item">
+                    <a href="mailto:test@example.com">邮件链接</a>
+                    <p>测试邮件协议</p>
+                </div>
+                <div class="link-item">
+                    <a href="tel:+1234567890">电话链接</a>
+                    <p>测试电话协议</p>
+                </div>
+                <div class="link-item">
+                    <a href="javascript:void(0)" data-url="/api/endpoint">JavaScript链接</a>
+                    <p>测试JavaScript协议</p>
+                </div>
+                <div class="link-item">
+                    <a href="#section1">锚点链接</a>
+                    <p>测试页面内锚点</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 数据属性测试</h2>
+            <div class="links-grid">
+                <div class="link-item" data-url="/api/data1">
+                    <span>数据属性1</span>
+                    <p>测试data-url属性提取</p>
+                </div>
+                <div class="link-item" data-url="https://api.example.com/data2">
+                    <span>数据属性2</span>
+                    <p>测试外部API数据属性</p>
+                </div>
+                <div class="link-item" data-href="/custom/link1">
+                    <span>自定义属性1</span>
+                    <p>测试data-href属性提取</p>
+                </div>
+                <div class="link-item" data-src="/resources/file.json">
+                    <span>自定义属性2</span>
+                    <p>测试data-src属性提取</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔧 高级测试用例</h2>
+            <div class="links-grid">
+                <div class="link-item">
+                    <div class="nested-content">
+                        <div class="level1">
+                            <div class="level2">
+                                <a href="/deep/nested/link">深层嵌套链接</a>
+                            </div>
+                        </div>
+                    </div>
+                    <p>测试深层嵌套选择器</p>
+                </div>
+                <div class="link-item">
+                    <a href="/conditional/link" style="display:none;">隐藏链接</a>
+                    <p>测试隐藏元素提取</p>
+                </div>
+                <div class="link-item">
+                    <a href="/dynamic/link" class="dynamic-link" id="dynamic1">动态链接</a>
+                    <p>测试ID和class选择器</p>
+                </div>
+                <div class="link-item">
+                    <a href="/multiple1">多重链接1</a>
+                    <a href="/multiple2">多重链接2</a>
+                    <p>测试同一容器多个链接</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 隐藏的CSS和JS资源链接，用于测试 -->
+        <link rel="stylesheet" href="/css/style1.css">
+        <link rel="stylesheet" href="https://cdn.example.com/style2.css">
+        <script src="/js/script1.js"></script>
+        <script src="https://cdn.example.com/script2.js"></script>
+    </div>
+    
+    <script>
+        // 动态添加一些链接用于测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('测试页面已加载，包含各种类型的链接用于测试URL提取器插件');
+            
+            // 可以在这里添加一些动态生成的链接
+            const dynamicContainer = document.createElement('div');
+            dynamicContainer.innerHTML = '<a href="/dynamic/generated">动态生成的链接</a>';
+            document.body.appendChild(dynamicContainer);
+        });
+    </script>
+</body>
+</html>

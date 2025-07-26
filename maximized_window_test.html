@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>详情窗口最大化测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .test-section {
+            margin: 25px 0;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .test-description {
+            color: #5a6c7d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); }
+        .btn-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .info-box {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .info-box h3 {
+            color: #2d5f2d;
+            margin-top: 0;
+        }
+        
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            margin: 8px 0;
+            color: #2d5f2d;
+        }
+        
+        .code-block {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .screen-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ 详情窗口最大化测试</h1>
+        <div class="subtitle">验证详情窗口是否以最大化状态打开</div>
+
+        <div class="info-box">
+            <h3>✅ 最大化功能说明</h3>
+            <ul>
+                <li><strong>自动最大化</strong>: 详情窗口将自动以最大化状态打开</li>
+                <li><strong>屏幕适配</strong>: 窗口尺寸自动匹配当前屏幕的可用区域</li>
+                <li><strong>位置调整</strong>: 窗口自动定位到屏幕左上角(0,0)</li>
+                <li><strong>保持功能</strong>: 滚动条和窗口调整功能仍然可用</li>
+            </ul>
+        </div>
+
+        <div class="screen-info">
+            <h4>📊 当前屏幕信息</h4>
+            <p id="screenInfo">正在获取屏幕信息...</p>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🚀 测试1: 模拟详情窗口打开</div>
+            <div class="test-description">
+                点击下面的按钮模拟详情窗口的打开行为，验证最大化效果。
+            </div>
+            <button class="btn btn-primary" id="testMaximizedWindow">打开最大化详情窗口</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🔍 测试2: 普通尺寸窗口对比</div>
+            <div class="test-description">
+                打开原始固定尺寸的窗口进行对比，观察差异。
+            </div>
+            <button class="btn btn-warning" id="testNormalWindow">打开固定尺寸窗口</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">📋 代码实现</div>
+            <div class="test-description">
+                详情窗口最大化的代码实现：
+            </div>
+            <div class="code-block">
+// 修改前：固定尺寸
+window.open(detailsPageUrl, 'URLViewer', 'width=800,height=600,scrollbars=yes,resizable=yes');
+
+// 修改后：最大化尺寸
+window.open(detailsPageUrl, 'URLViewer', 
+    'width=' + screen.availWidth + 
+    ',height=' + screen.availHeight + 
+    ',left=0,top=0,scrollbars=yes,resizable=yes');
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>🎯 验证要点</h3>
+            <ul>
+                <li>窗口是否占满整个屏幕可用区域</li>
+                <li>窗口是否正确定位到屏幕左上角</li>
+                <li>滚动条和调整大小功能是否正常</li>
+                <li>详情页面的内容是否正常显示</li>
+                <li>关闭按钮和其他功能是否正常工作</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 显示屏幕信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const screenInfo = document.getElementById('screenInfo');
+            screenInfo.innerHTML = 
+                '屏幕宽度: ' + screen.width + 'px<br>' +
+                '屏幕高度: ' + screen.height + 'px<br>' +
+                '可用宽度: ' + screen.availWidth + 'px<br>' +
+                '可用高度: ' + screen.availHeight + 'px<br>' +
+                '颜色深度: ' + screen.colorDepth + 'bit';
+        });
+
+        // 测试最大化窗口
+        document.getElementById('testMaximizedWindow').addEventListener('click', function() {
+            const detailsUrl = 'details_style_test.html';
+            const windowFeatures = 
+                'width=' + screen.availWidth + 
+                ',height=' + screen.availHeight + 
+                ',left=0,top=0,scrollbars=yes,resizable=yes';
+            
+            const testWindow = window.open(detailsUrl, 'MaximizedTest', windowFeatures);
+            
+            if (!testWindow) {
+                alert('弹窗被阻止，请检查浏览器设置并允许弹窗');
+            } else {
+                console.log('最大化窗口已打开，尺寸: ' + screen.availWidth + 'x' + screen.availHeight);
+            }
+        });
+
+        // 测试普通尺寸窗口
+        document.getElementById('testNormalWindow').addEventListener('click', function() {
+            const detailsUrl = 'details_style_test.html';
+            const windowFeatures = 'width=800,height=600,scrollbars=yes,resizable=yes';
+            
+            const testWindow = window.open(detailsUrl, 'NormalTest', windowFeatures);
+            
+            if (!testWindow) {
+                alert('弹窗被阻止，请检查浏览器设置并允许弹窗');
+            } else {
+                console.log('普通尺寸窗口已打开，尺寸: 800x600');
+            }
+        });
+    </script>
+</body>
+</html>

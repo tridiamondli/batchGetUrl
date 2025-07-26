@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP修复验证页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .test-links a {
+            display: block;
+            margin: 5px 0;
+            color: #2980b9;
+            text-decoration: none;
+            padding: 5px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .test-links a:hover {
+            text-decoration: underline;
+            background: #e9ecef;
+        }
+        .instruction {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CSP修复验证页面</h1>
+        
+        <div class="instruction">
+            <h3>验证说明</h3>
+            <p>这个页面用于验证Chrome插件的CSP（Content Security Policy）问题是否已修复。</p>
+            <ol>
+                <li>使用Chrome插件提取这个页面的链接</li>
+                <li>点击"查看详情"按钮</li>
+                <li>检查浏览器控制台是否还有CSP错误</li>
+                <li>测试详情窗口中的所有按钮功能</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ 如果仍然遇到问题：</strong>
+            <ul>
+                <li>确保使用最新版本的插件代码</li>
+                <li>重新加载插件（在chrome://extensions/中点击刷新）</li>
+                <li>检查控制台错误信息</li>
+                <li>确认浏览器版本支持Manifest V3</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>测试链接组1 - 基础链接</h3>
+            <div class="test-links">
+                <a href="https://www.example1.com">示例链接1</a>
+                <a href="https://www.example2.com/path">示例链接2</a>
+                <a href="https://www.example3.com/page.html">示例链接3</a>
+                <a href="https://github.com/user/repo">GitHub链接</a>
+                <a href="https://stackoverflow.com/questions/123">Stack Overflow链接</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试链接组2 - 相对路径</h3>
+            <div class="test-links">
+                <a href="/root-path.html">根路径链接</a>
+                <a href="./relative-path.html">相对路径链接</a>
+                <a href="../parent-path.html">父路径链接</a>
+                <a href="subdir/file.html">子目录链接</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试链接组3 - 特殊字符</h3>
+            <div class="test-links">
+                <a href="https://example.com/path?param=value&other=123">带参数链接</a>
+                <a href="https://example.com/path#section">带锚点链接</a>
+                <a href="https://example.com/file.pdf">PDF文件链接</a>
+                <a href="mailto:test@example.com">邮件链接</a>
+                <a href="tel:+1234567890">电话链接</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>预期结果检查</h3>
+            <p><strong>成功标准：</strong></p>
+            <ul>
+                <li>✅ 详情窗口能够正常打开</li>
+                <li>✅ 控制台中没有CSP错误信息</li>
+                <li>✅ "📋 复制全部URL" 按钮可以工作</li>
+                <li>✅ "💾 导出为文本" 按钮可以工作</li>
+                <li>✅ 每个URL的"复制"按钮可以工作</li>
+                <li>✅ "🔍 调试信息" 按钮可以显示环境信息</li>
+            </ul>
+            
+            <p><strong>如果失败：</strong></p>
+            <ul>
+                <li>❌ 查看浏览器控制台的错误信息</li>
+                <li>❌ 检查是否是权限或API兼容性问题</li>
+                <li>❌ 尝试在HTTPS环境下测试</li>
+                <li>❌ 参考DETAILS_TROUBLESHOOTING.md文档</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载后的初始化
+        window.addEventListener('load', function() {
+            console.log('CSP验证页面已加载');
+            console.log('当前URL:', window.location.href);
+            console.log('时间:', new Date().toLocaleString());
+            
+            // 检查一些基础API
+            console.log('基础环境检查:');
+            console.log('- navigator.clipboard:', navigator.clipboard ? '支持' : '不支持');
+            console.log('- Blob:', typeof Blob !== 'undefined' ? '支持' : '不支持');
+            console.log('- URL.createObjectURL:', typeof URL !== 'undefined' && URL.createObjectURL ? '支持' : '不支持');
+            console.log('- window.open:', window.open ? '支持' : '不支持');
+        });
+    </script>
+</body>
+</html>
