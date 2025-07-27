@@ -67,6 +67,22 @@ body {
     font-size: 1.2em;
 }
 
+.mode-info {
+    color: #6c757d;
+    font-size: 0.9em;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.text-content {
+    color: #495057;
+    word-break: break-all;
+    line-height: 1.4;
+    padding: 2px 0;
+    display: inline-block;
+    max-width: calc(100% - 100px);
+}
+
 .actions {
     margin-bottom: 30px;
     padding: 20px;

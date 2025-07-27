@@ -18,8 +18,11 @@ class URLExtractor {
      * 构造函数 - 初始化插件核心功能
      */
     constructor() {
-        // 存储提取到的URL数组
+        // 存储提取到的内容数组
         this.extractedUrls = [];
+        // 存储内容模式信息
+        this.extractedMode = null;
+        this.extractedModeDetails = null;
         
         // 检查Chrome扩展API的可用性
         // 支持Chrome Storage API和LocalStorage的双重降级策略
@@ -105,9 +108,6 @@ class URLExtractor {
         this.manageXpathBtn = document.getElementById('manageXpathBtn');
         this.status = document.getElementById('status');
         this.urlCount = document.getElementById('urlCount');
-        
-        // 添加调试信息
-        console.log('初始化元素 - xpathInput:', this.xpathInput);
     }
 
     bindEvents() {
@@ -134,13 +134,115 @@ class URLExtractor {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            console.log('开始提取URL，XPath:', xpath, '当前标签页:', tab.url);
-            
             // 注入脚本到页面
             const results = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: (xpathRule, currentPageUrl) => {
-                    console.log('在页面中执行提取，XPath:', xpathRule);
+                    // 内容模式检测函数
+                    window.detectContentMode = function(contentArray, baseUrl, currentDir) {
+                        if (!contentArray || contentArray.length === 0) {
+                            return { mode: 'text', processedContent: [], details: '无内容' };
+                        }
+
+                        // 检查是否所有内容都符合URL格式
+                        let urlCount = 0;
+                        let relativeCount = 0;
+                        let absoluteCount = 0;
+                        const processedUrls = [];
+
+                        for (const content of contentArray) {
+                            const trimmed = content.trim();
+                            if (window.isValidUrl(trimmed)) {
+                                urlCount++;
+                                if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+                                    absoluteCount++;
+                                    processedUrls.push(trimmed);
+                                } else {
+                                    relativeCount++;
+                                    const absoluteUrl = window.convertToAbsoluteUrl(trimmed, baseUrl, currentDir);
+                                    processedUrls.push(absoluteUrl);
+                                }
+                            } else {
+                                // 有一个不符合URL格式，直接判定为文本模式
+                                return { 
+                                    mode: 'text', 
+                                    processedContent: contentArray,
+                                    details: '文本模式'
+                                };
+                            }
+                        }
+
+                        // 所有内容都符合URL格式
+                        return {
+                            mode: 'url',
+                            processedContent: processedUrls,
+                            details: 'URL模式'
+                        };
+                    };
+
+                    // URL有效性验证函数
+                    window.isValidUrl = function(str) {
+                        const trimmed = str.trim();
+                        
+                        // 检查是否为绝对URL
+                        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+                            try {
+                                new URL(trimmed);
+                                return true;
+                            } catch {
+                                return false;
+                            }
+                        }
+                        
+                        // 检查是否为相对路径
+                        return window.isValidRelativePath(trimmed);
+                    };
+
+                    // 相对路径有效性验证
+                    window.isValidRelativePath = function(path) {
+                        const trimmed = path.trim();
+                        
+                        // 排除明显不是URL的内容
+                        if (trimmed === '' || 
+                            trimmed.includes('\n') || 
+                            trimmed.includes('\t') ||
+                            trimmed.length > 2000 ||
+                            /[<>"|*]/.test(trimmed)) {
+                            return false;
+                        }
+                        
+                        // 支持以下格式的相对路径：
+                        if (trimmed.startsWith('//')) {
+                            // 协议相对路径
+                            return true;
+                        } else if (trimmed.startsWith('/')) {
+                            // 根目录路径（站内相对路径）
+                            // 检查是否是有效的路径格式（包含路径字符、参数等）
+                            return /^\/[a-zA-Z0-9\/._~:?#[\]@!$&'()*+,;=%=-]*$/.test(trimmed);
+                        }
+                        
+                        return false;
+                    };
+
+                    // 相对路径转绝对路径
+                    window.convertToAbsoluteUrl = function(relativePath, baseUrl, currentDir) {
+                        const trimmed = relativePath.trim();
+                        
+                        try {
+                            if (trimmed.startsWith('//')) {
+                                // 协议相对URL
+                                return window.location.protocol + trimmed;
+                            } else if (trimmed.startsWith('/')) {
+                                // 根相对URL（站内相对路径）
+                                return baseUrl + trimmed;
+                            } else {
+                                // 其他情况直接返回原始路径（不应该到达这里，因为已在验证中过滤）
+                                return trimmed;
+                            }
+                        } catch (e) {
+                            return trimmed;
+                        }
+                    };
                     
                     try {
                         // 执行XPath查询
@@ -151,11 +253,6 @@ class URLExtractor {
                             XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
                             null
                         );
-
-                        console.log('匹配到节点数量:', result.snapshotLength);
-
-                        const urls = [];
-                        const seenUrls = new Set();
 
                         // 获取基础URL信息
                         let baseUrl = '';
@@ -171,118 +268,110 @@ class URLExtractor {
                             currentDir = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
                         }
 
-                        console.log('baseUrl:', baseUrl, 'currentDir:', currentDir);
-
+                        // 第一步：提取原始内容
+                        const rawContent = [];
                         for (let i = 0; i < result.snapshotLength; i++) {
                             const node = result.snapshotItem(i);
-                            let url = '';
+                            let content = '';
 
-                            // 获取URL值
+                            // 获取内容值
                             if (node.nodeType === Node.ATTRIBUTE_NODE) {
-                                url = node.value;
+                                content = node.value;
                             } else if (node.nodeType === Node.ELEMENT_NODE) {
-                                url = node.href || node.src || node.textContent;
+                                content = node.href || node.src || node.textContent;
                             } else if (node.nodeType === Node.TEXT_NODE) {
-                                url = node.textContent;
+                                content = node.textContent;
                             }
 
-                            if (!url || !url.trim) continue;
-                            url = url.trim();
-                            if (!url) continue;
+                            if (!content || !content.trim) continue;
+                            content = content.trim();
+                            if (!content) continue;
 
-                            console.log(`处理节点 ${i}: ${url}`);
-
-                            // 处理相对路径
-                            let finalUrl = url;
-                            
-                            try {
-                                if (url.startsWith('//')) {
-                                    // 协议相对URL
-                                    finalUrl = window.location.protocol + url;
-                                } else if (url.startsWith('/')) {
-                                    // 根相对URL
-                                    finalUrl = baseUrl + url;
-                                } else if (!url.startsWith('http://') && !url.startsWith('https://') && 
-                                           !url.startsWith('mailto:') && !url.startsWith('tel:') && 
-                                           !url.startsWith('javascript:') && !url.startsWith('#')) {
-                                    // 相对URL
-                                    finalUrl = currentDir + url;
-                                }
-
-                                // 尝试规范化URL
-                                try {
-                                    const normalizedUrl = new URL(finalUrl).href;
-                                    if (!seenUrls.has(normalizedUrl)) {
-                                        seenUrls.add(normalizedUrl);
-                                        urls.push(normalizedUrl);
-                                        console.log(`添加URL: ${normalizedUrl}`);
-                                    }
-                                } catch (urlError) {
-                                    // 无法规范化的URL直接添加
-                                    if (!seenUrls.has(finalUrl)) {
-                                        seenUrls.add(finalUrl);
-                                        urls.push(finalUrl);
-                                        console.log(`添加原始URL: ${finalUrl}`);
-                                    }
-                                }
-                            } catch (e) {
-                                console.warn('处理URL时出错:', url, e);
-                            }
+                            rawContent.push(content);
                         }
 
-                        console.log('最终提取结果:', urls.length, '个URL');
-                        return { urls, error: null };
+                        // 第二步：检测内容模式
+                        const modeResult = window.detectContentMode(rawContent, baseUrl, currentDir);
+
+                        // 第三步：根据模式处理内容
+                        const finalResults = [];
+                        const seenItems = new Set();
+
+                        if (modeResult.mode === 'url') {
+                            // URL模式：处理相对路径补全和去重
+                            modeResult.processedContent.forEach(url => {
+                                if (!seenItems.has(url)) {
+                                    seenItems.add(url);
+                                    finalResults.push(url);
+                                }
+                            });
+                        } else {
+                            // 文本模式：保持原样，仅去重
+                            rawContent.forEach(text => {
+                                if (!seenItems.has(text)) {
+                                    seenItems.add(text);
+                                    finalResults.push(text);
+                                }
+                            });
+                        }
+
+                        return { 
+                            urls: finalResults, 
+                            error: null, 
+                            mode: modeResult.mode,
+                            modeDetails: modeResult.details 
+                        };
                         
                     } catch (error) {
-                        console.error('XPath提取出错:', error);
                         return { urls: [], error: error.message };
                     }
                 },
                 args: [xpath, tab.url]
             });
 
-            console.log('提取脚本执行结果:', results);
-
             if (results && results[0] && results[0].result) {
-                const { urls, error } = results[0].result;
-                
-                console.log('提取到的URLs:', urls, '错误:', error);
+                const { urls, error, mode, modeDetails } = results[0].result;
                 
                 if (error) {
                     this.showStatus(`XPath错误: ${error}`, 'error');
                 } else {
                     this.extractedUrls = urls;
+                    // 更新属性以存储模式信息
+                    this.extractedMode = mode;
+                    this.extractedModeDetails = modeDetails;
+                    
                     if (urls.length > 0) {
-                        this.showStatus(`成功提取 ${urls.length} 个URL`, 'success');
+                        const modeText = mode === 'url' ? 'URL' : '文本项';
+                        const modePrefix = mode === 'url' ? 'URL模式' : '文本模式';
+                        this.showStatus(`${modePrefix}：成功提取 ${urls.length} 个${modeText}`, 'success');
                     } else {
-                        this.showStatus(`未找到匹配的URL，请检查XPath规则或页面内容`, 'info');
+                        this.showStatus(`未找到匹配的内容，请检查XPath规则或页面内容`, 'info');
                     }
                     this.updateUrlCount();
                     this.enableButtons();
                 }
             } else {
-                console.error('提取结果为空或格式错误:', results);
                 this.showStatus('提取失败，请检查XPath规则', 'error');
             }
         } catch (error) {
-            console.error('提取URL时出错:', error);
             this.showStatus('提取失败: ' + error.message, 'error');
         } finally {
             this.extractBtn.disabled = false;
-            this.extractBtn.textContent = '🔍 提取URL';
+            this.extractBtn.textContent = '🔍 提取内容';
         }
     }
 
     async copyUrls() {
         if (this.extractedUrls.length === 0) {
-            this.showStatus('没有可复制的URL', 'error');
+            this.showStatus('没有可复制的内容', 'error');
             return;
         }
 
         try {
-            const urlsText = this.extractedUrls.join('\n');
-            await navigator.clipboard.writeText(urlsText);
-            this.showStatus(`已复制 ${this.extractedUrls.length} 个URL到剪贴板`, 'success');
+            const contentText = this.extractedUrls.join('\n');
+            await navigator.clipboard.writeText(contentText);
+            const modeText = this.extractedMode === 'url' ? 'URL' : '文本';
+            this.showStatus(`已复制 ${this.extractedUrls.length} 个${modeText}项到剪贴板`, 'success');
         } catch (error) {
             console.error('复制失败:', error);
             this.showStatus('复制失败: ' + error.message, 'error');
@@ -291,14 +380,20 @@ class URLExtractor {
 
     async viewUrls() {
         if (this.extractedUrls.length === 0) {
-            this.showStatus('没有可查看的URL', 'error');
+            this.showStatus('没有可查看的内容', 'error');
             return;
         }
 
         try {
             // 1. 将数据存储到 chrome.storage.local（与 details.js 保持一致）
-            const dataKey = 'urls_' + Date.now();
-            await chrome.storage.local.set({ [dataKey]: this.extractedUrls });
+            const dataKey = 'extracted_content_' + Date.now();
+            const dataToStore = {
+                content: this.extractedUrls,
+                mode: this.extractedMode,
+                modeDetails: this.extractedModeDetails,
+                timestamp: new Date().toISOString()
+            };
+            await chrome.storage.local.set({ [dataKey]: dataToStore });
 
             // 2. 打开新的详情页面，并通过URL参数传递数据键
             const detailsPageUrl = chrome.runtime.getURL('details.html?dataKey=' + dataKey);
@@ -333,6 +428,8 @@ class URLExtractor {
 
     clearResults() {
         this.extractedUrls = [];
+        this.extractedMode = null;
+        this.extractedModeDetails = null;
         this.disableButtons();
         this.hideStatus();
         this.updateUrlCount();
@@ -472,7 +569,8 @@ class URLExtractor {
 
     updateUrlCount() {
         if (this.extractedUrls.length > 0) {
-            this.urlCount.textContent = `✅ 已提取 ${this.extractedUrls.length} 个URL`;
+            const modeText = this.extractedMode === 'url' ? 'URL' : '内容项';
+            this.urlCount.textContent = `✅ 已提取 ${this.extractedUrls.length} 个${modeText}`;
         } else {
             this.urlCount.textContent = '';
         }
@@ -786,8 +884,6 @@ class URLExtractor {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('点击使用按钮:', originalXPath, originalName);
-                    
                     // 先执行XPath应用逻辑
                     await self.useCustomXPath(originalXPath, originalName);
                     
@@ -809,21 +905,14 @@ class URLExtractor {
     }
 
     async useCustomXPath(xpath, name) {
-        console.log('使用自定义XPath - 输入参数:', { xpath, name });
-        
         // 确保设置XPath输入框的值
         if (!this.xpathInput) {
-            console.error('XPath输入框元素未找到');
             this.showStatus('输入框元素未找到', 'error');
             return;
         }
         
-        console.log('更新前输入框值:', this.xpathInput.value);
-        
         // 直接设置值
         this.xpathInput.value = xpath;
-        
-        console.log('更新后输入框值:', this.xpathInput.value);
         
         // 触发input事件以确保保存
         this.xpathInput.dispatchEvent(new Event('input', { bubbles: true }));
