@@ -487,32 +487,30 @@ class URLExtractor {
                 });
             });
 
-        let presetHtml = '<div style="max-height: 400px; overflow-y: auto;">';
+        let presetHtml = '';
         
         // 内置规则
-        presetHtml += '<h4 style="margin: 0 0 10px 0; color: #007bff;">内置规则</h4>';
+        presetHtml += '<h4>📚 内置规则</h4>';
         presets.filter(p => p.type === 'builtin').forEach(function(preset) {
             presetHtml += '<div class="preset-item" onclick="selectPreset(\'' + preset.value.replace(/'/g, "\\'") + '\')">' +
-                '<strong>' + preset.name + '</strong><br>' +
-                '<code style="color:#666; font-size: 11px;">' + preset.value + '</code>' +
+                '<div class="preset-name">' + preset.name + '</div>' +
+                '<div class="preset-xpath">' + preset.value + '</div>' +
             '</div>';
         });
 
         // 自定义规则
         const customPresets = presets.filter(p => p.type === 'custom');
         if (customPresets.length > 0) {
-            presetHtml += '<h4 style="margin: 15px 0 10px 0; color: #28a745;">自定义规则</h4>';
+            presetHtml += '<h4>⭐ 自定义规则</h4>';
             customPresets.forEach(function(preset) {
                 presetHtml += '<div class="preset-item" onclick="selectPreset(\'' + preset.value.replace(/'/g, "\\'") + '\')">' +
-                    '<strong>' + preset.name + '</strong> <span style="color: #999; font-size: 11px;">(使用' + preset.useCount + '次)</span><br>' +
-                    '<code style="color:#666; font-size: 11px;">' + preset.value + '</code>' +
+                    '<div class="preset-name">' + preset.name + '<span class="usage-count">使用' + preset.useCount + '次</span></div>' +
+                    '<div class="preset-xpath">' + preset.value + '</div>' +
                 '</div>';
             });
         }
 
-        presetHtml += '</div>';
-
-        const presetWindow = window.open('', 'PresetRules', 'width=600,height=500,scrollbars=yes');
+        const presetWindow = window.open('', 'PresetRules', 'width=' + screen.availWidth + ',height=' + screen.availHeight + ',left=0,top=0,scrollbars=yes,resizable=yes');
         presetWindow.document.write(
             '<!DOCTYPE html>' +
             '<html>' +
@@ -520,16 +518,125 @@ class URLExtractor {
             '    <meta charset="utf-8">' +
             '    <title>预设XPath规则</title>' +
             '    <style>' +
-            '        body { font-family: Arial, sans-serif; margin: 20px; }' +
-            '        .preset-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; margin-bottom: 5px; }' +
-            '        .preset-item:hover { background: #f0f0f0; border-radius: 4px; }' +
-            '        code { background: #f5f5f5; padding: 2px 4px; border-radius: 3px; }' +
-            '        h4 { border-bottom: 2px solid currentColor; padding-bottom: 5px; }' +
+            '        body {' +
+            '            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;' +
+            '            margin: 0;' +
+            '            padding: 20px;' +
+            '            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' +
+            '            min-height: 100vh;' +
+            '            color: #333;' +
+            '            -webkit-font-smoothing: antialiased;' +
+            '            -moz-osx-font-smoothing: grayscale;' +
+            '        }' +
+            '        .container {' +
+            '            background: white;' +
+            '            padding: 40px;' +
+            '            border-radius: 20px;' +
+            '            box-shadow: 0 12px 40px rgba(0,0,0,0.25);' +
+            '            backdrop-filter: blur(10px);' +
+            '            max-width: 1200px;' +
+            '            width: 90%;' +
+            '            margin: 40px auto;' +
+            '            min-height: calc(100vh - 120px);' +
+            '        }' +
+            '        h2 {' +
+            '            text-align: center;' +
+            '            color: #2c3e50;' +
+            '            margin-bottom: 15px;' +
+            '            font-size: 2.8em;' +
+            '            font-weight: 700;' +
+            '        }' +
+            '        .subtitle {' +
+            '            text-align: center;' +
+            '            color: #7f8c8d;' +
+            '            margin-bottom: 40px;' +
+            '            font-style: italic;' +
+            '            font-size: 1.2em;' +
+            '        }' +
+            '        .rules-container {' +
+            '            max-height: calc(100vh - 300px);' +
+            '            min-height: 500px;' +
+            '            overflow-y: auto;' +
+            '            border: 1px solid #e2e8f0;' +
+            '            border-radius: 12px;' +
+            '            background: #ffffff;' +
+            '            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);' +
+            '        }' +
+            '        h4 {' +
+            '            margin: 20px 0 15px 0;' +
+            '            font-size: 1.4em;' +
+            '            font-weight: 700;' +
+            '            padding: 12px 18px;' +
+            '            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' +
+            '            color: white;' +
+            '            border-radius: 10px;' +
+            '            text-shadow: 0 1px 2px rgba(0,0,0,0.1);' +
+            '            letter-spacing: 0.5px;' +
+            '        }' +
+            '        h4:first-child { margin-top: 0; }' +
+            '        .preset-item {' +
+            '            padding: 24px 28px;' +
+            '            border-bottom: 1px solid #e2e8f0;' +
+            '            cursor: pointer;' +
+            '            transition: all 0.3s ease;' +
+            '            background: white;' +
+            '            border-radius: 0;' +
+            '        }' +
+            '        .preset-item:last-child { border-bottom: none; }' +
+            '        .preset-item:hover {' +
+            '            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);' +
+            '            transform: translateX(4px);' +
+            '            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);' +
+            '            border-left: 4px solid #667eea;' +
+            '        }' +
+            '        .preset-item:hover .preset-name {' +
+            '            color: #667eea;' +
+            '        }' +
+            '        .preset-item:hover .preset-xpath {' +
+            '            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);' +
+            '            border-color: #667eea;' +
+            '            color: #1a202c;' +
+            '        }' +
+            '        .preset-name {' +
+            '            font-weight: 600;' +
+            '            color: #1a202c;' +
+            '            font-size: 16px;' +
+            '            margin-bottom: 10px;' +
+            '            line-height: 1.4;' +
+            '        }' +
+            '        .preset-xpath {' +
+            '            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);' +
+            '            padding: 12px 16px;' +
+            '            border-radius: 8px;' +
+            '            font-family: "Hack", "Roboto Mono", monospace;' +
+            '            font-size: 14px;' +
+            '            color: #ea580c;' +
+            '            border: 1px solid #fdba74;' +
+            '            word-break: break-all;' +
+            '            line-height: 1.5;' +
+            '            font-weight: 600;' +
+            '            border-left: 4px solid #ea580c;' +
+            '        }' +
+            '        .usage-count {' +
+            '            color: #718096;' +
+            '            font-size: 12px;' +
+            '            font-weight: 500;' +
+            '            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);' +
+            '            padding: 3px 8px;' +
+            '            border-radius: 12px;' +
+            '            margin-left: 10px;' +
+            '            display: inline-block;' +
+            '        }' +
             '    </style>' +
             '</head>' +
             '<body>' +
-            '    <h2>选择XPath规则</h2>' +
+            '    <div class="container">' +
+            '        <h2>🎯 XPath规则选择器</h2>' +
+            '        <div class="subtitle">选择预设规则或自定义规则快速开始提取</div>' +
+            '        <div class="rules-container">' +
             presetHtml +
+            '        </div>' +
+            '    </div>' +
             '    <script>' +
             '        function selectPreset(value) {' +
             '            window.opener.document.getElementById(\'xpathInput\').value = value;' +
