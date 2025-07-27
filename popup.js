@@ -252,7 +252,11 @@ class URLExtractor {
                     this.showStatus(`XPath错误: ${error}`, 'error');
                 } else {
                     this.extractedUrls = urls;
-                    this.showStatus(`成功提取 ${urls.length} 个URL`, 'success');
+                    if (urls.length > 0) {
+                        this.showStatus(`成功提取 ${urls.length} 个URL`, 'success');
+                    } else {
+                        this.showStatus(`未找到匹配的URL，请检查XPath规则或页面内容`, 'info');
+                    }
                     this.updateUrlCount();
                     this.enableButtons();
                 }
