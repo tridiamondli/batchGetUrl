@@ -2,7 +2,8 @@
 
 > 一个功能强大的Chrome浏览器插件，专门用于根据自定义XPath规则智能提取网页中的URL链接或文本内容，支持自动模式识别
 
-[![Manifest V3](https://img.shields.io/badge/Manifest-V3-green.svg)](https://developer.chrome.com/d## 更新日志
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-green.svg)](https://developer.chrome.com/d##) [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+更新日志
 
 ### v1.2.0 (2025-07-27) - 智能内容识别版本
 - 🧠 **新增智能模式识别** - 自动识别URL模式和文本模式，采用不同处理策略
@@ -30,8 +31,7 @@
 - 💾 **规则管理系统** - 保存、管理自定义XPath规则
 - 📋 **批量操作支持** - 复制、导出多种格式
 - 🎨 **现代化界面** - 紫色渐变主题，响应式设计/)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 ## ✨ 核心特性
 
